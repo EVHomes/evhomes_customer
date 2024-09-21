@@ -38,6 +38,43 @@ dependencies:
   google_fonts: ^6.2.1
   shared_preferences_riverpod: ^0.3.0
   pin_code_fields: ^8.0.1
+  firebase_core: ^3.4.0
+  video_player: ^2.9.1
+  lottie: ^3.1.2
+  animated_splash_screen: ^1.3.0
+  cloud_firestore: ^5.3.0
+  firebase_auth: ^5.2.0
+  awesome_snackbar_content: ^0.1.3
+  font_awesome_flutter: ^10.7.0
+  fluentui_system_icons: ^1.1.255
+  fl_chart: ^0.69.0
+  cached_network_image: ^3.4.1
+  dio: ^5.6.0
+  provider: ^6.1.2
+  permission_handler: ^11.3.1
+  flutter_staggered_grid_view: ^0.7.0
+  open_file: ^3.4.0
+  flip_card: ^0.7.0
+  carousel_slider: ^5.0.0
+  url_launcher: ^6.3.0
+  shared_preferences: ^2.3.2
+  from_css_color: ^2.0.0
+  timeago: ^3.7.0
+  json_path: ^0.7.4
+  intl: ^0.19.0
+  page_transition: ^2.1.0
+  auto_size_text: ^3.0.0
+  country_code_picker: ^2.0.2
+  multi_select_flutter: ^4.0.0
+  intl_phone_field: ^3.0.0
+  intl_phone_number_input: ^0.7.4
+  multiselect: ^0.1.1
+  multiselect_dropdown_flutter: ^0.0.7
+  toggle_switch: ^2.3.0
+  load_switch: ^2.1.0
+  image_picker: ^1.1.2
+  path_provider: ^2.1.4
+  confetti: ^0.6.0
 
 dev_dependencies:
   flutter_test:
