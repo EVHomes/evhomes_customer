@@ -1,3 +1,4 @@
+import 'package:ev_homes_customer/Wrappers/home_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -85,6 +86,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
             // Verify OTP Button
             ElevatedButton(
               onPressed: () {
+                Navigator.pushReplacement(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const HomeWrapper()),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,

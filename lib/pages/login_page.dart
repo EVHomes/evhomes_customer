@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:ev_homes_customer/pages/signup.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -133,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _onSignUpPressed() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SignUpTabBarPage()),
+      MaterialPageRoute(builder: (context) => const SignUpTabBarPage()),
     );
   }
 }
@@ -141,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
 class PhoneNumberField extends StatelessWidget {
   final Function(String?) onSaved;
 
-  PhoneNumberField({required this.onSaved});
+  const PhoneNumberField({super.key, required this.onSaved});
 
   @override
   Widget build(BuildContext context) {
@@ -158,6 +160,8 @@ class PhoneNumberField extends StatelessWidget {
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please enter your mobile number';
+        } else if (value.length != 10){
+          return 'Please enter a valid mobile number' ;
         }
         return null;
       },

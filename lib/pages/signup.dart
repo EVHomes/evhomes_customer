@@ -67,6 +67,7 @@ class SignUpTabBar extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _SignUpTabBarState createState() => _SignUpTabBarState();
 }
 
@@ -340,7 +341,7 @@ Padding(
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please enter your phone number';
-        } else if (value.length < 10) {
+        } else if (value.length != 10) {
           return 'Invalid phone number';
         }
         return null;
