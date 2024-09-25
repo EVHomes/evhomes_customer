@@ -1,3 +1,4 @@
+import 'package:ev_homes_customer/Wrappers/home_wrapper.dart';
 import 'package:flutter/material.dart';
 
 class ChatPage extends StatefulWidget {
@@ -13,26 +14,45 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        // Navigate to HomeWrapper when back button is pressed
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeWrapper()),
+        );
+        return false; // Prevent default back action
+      },
+      child: Scaffold(
         backgroundColor: Colors.white,
-        title: const Text('Chat'),
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-              reverse: true,
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                return _buildChatBubble(messages[index]);
-              },
-            ),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: const Text('Chat'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () {
+              // Navigate to HomeWrapper when the back button is pressed
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeWrapper()),
+              );
+            },
           ),
-          _buildInputArea(),
-        ],
+        ),
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: ListView.builder(
+                reverse: true,
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  return _buildChatBubble(messages[index]);
+                },
+              ),
+            ),
+            _buildInputArea(),
+          ],
+        ),
       ),
     );
   }
@@ -46,7 +66,7 @@ class _ChatPageState extends State<ChatPage> {
         alignment: isSentByUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
           decoration: BoxDecoration(
-            color: isSentByUser ? Colors.deepPurpleAccent: Colors.grey[300],
+            color: isSentByUser ? Colors.deepPurpleAccent : Colors.grey[300],
             borderRadius: BorderRadius.circular(20),
           ),
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
@@ -63,12 +83,11 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildInputArea() {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20,20,20,100),
+      padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 100),
       child: Row(
         children: <Widget>[
           Expanded(
             child: TextField(
-
               controller: _controller,
               decoration: InputDecoration(
                 hintText: "Type a message...",
@@ -89,7 +108,10 @@ class _ChatPageState extends State<ChatPage> {
               });
             },
             backgroundColor: Colors.deepPurpleAccent,
-            child: const Icon(Icons.send,color: Colors.white,),
+            child: const Icon(
+              Icons.send,
+              color: Colors.white,
+            ),
           ),
         ],
       ),

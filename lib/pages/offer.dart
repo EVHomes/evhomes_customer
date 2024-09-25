@@ -1,168 +1,159 @@
-import 'package:ev_homes_customer/pages/description%20.dart';
+import 'package:ev_homes_customer/Wrappers/home_wrapper.dart';
+// import 'package:ev_homes_customer/pages/home_wrapper.dart'; // Import your HomeWrapper
 import 'package:ev_homes_customer/pages/offer_pop_up_page.dart';
+import 'package:ev_homes_customer/pages/offers_description.dart';
 import 'package:flutter/material.dart';
 
-class OfferPage extends StatefulWidget {
-  const OfferPage({super.key});
+class Offer {
+  final String title;
+  final List<String> images;
+  final String description;
+  final String terms;
 
-  @override
-  _OfferPageState createState() => _OfferPageState();
+  Offer({
+    required this.title,
+    required this.images,
+    required this.description,
+    required this.terms,
+  });
 }
 
-class _OfferPageState extends State<OfferPage> {
+class OfferDetailPage extends StatefulWidget { 
+  final bool showDiolog;
+  const OfferDetailPage({super.key, required this.showDiolog});
+
+  @override
+  _OfferDetailPageState createState() => _OfferDetailPageState();
+}
+
+class _OfferDetailPageState extends State<OfferDetailPage> {
+  // Example data for ongoing offers
+  final List<Offer> offers = [
+    Offer(
+      title: "New Project!!",
+      images: [
+        'assets/images/mb1.jpg',
+        'assets/images/mb2.jpg',
+        'assets/images/mb3.jpg'
+      ],
+      description: "Grab the opportunity and win high offers on booking.",
+      terms: "Terms and conditions apply. Valid until 30th September only.",
+    ),
+    Offer(
+      title: "Get 20% off on booking",
+      images: ['assets/images/mb2.jpg', 'assets/images/mb2.jpg'],
+      description: "Grab the opportunity and win high offers on booking.",
+      terms: "Terms and conditions apply. Valid until 30th September only",
+    ),
+    // Add more offers as needed
+  ];
+
   @override
   void initState() {
     super.initState();
-    
-    // Show the pop-up when the page is opened
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => const CelebratePopup(),
-      );
-    });
+
+    // Trigger the CelebratePopup when this page is loaded
+    if (widget.showDiolog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => const SpecialOfferPopup(),
+        );
+      });
+    }
+  }
+
+  Future<bool> _onWillPop() async {
+    // Override the back button to navigate to HomeWrapper
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeWrapper()),
+    );
+    return false; // Prevent default back action
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+    return WillPopScope(
+      onWillPop: _onWillPop, // Handle back button press
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Ongoing Offers"),
+          backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+          foregroundColor: Colors.black,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back), // Back button icon
+            onPressed: () {
+              // Navigate back to HomeWrapper using pushReplacement
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeWrapper()),
+              );
+            },
+          ),
         ),
-        title: const Text('marina bay 10% Off'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Offer Image
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.pink[50], // Background color
+        body: ListView.builder(
+          itemCount: offers.length,
+          itemBuilder: (context, index) {
+            final offer = offers[index];
+            return GestureDetector(
+              onTap: () {
+                // Add custom transition and back navigation using pushReplacement
+                Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    transitionDuration: const Duration(milliseconds: 500),
+                    pageBuilder: (_, __, ___) => const OfferPage(), // Navigate to OfferPage
+                    transitionsBuilder: (_, animation, __, child) {
+                      const begin = Offset(1.0, 0.0); // Slide from the right
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+                      final tween = Tween(begin: begin, end: end)
+                          .chain(CurveTween(curve: curve));
+                      final offsetAnimation = animation.drive(tween);
+
+                      return SlideTransition(
+                          position: offsetAnimation, child: child);
+                    },
+                  ),
+                );
+              },
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15), // Circular corners
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Image.asset(
-                            'assets/images/evicon.jpg', // Replace with your logo
-                            height: 40,
-                          ),
-                          const SizedBox(width: 8),
-                          
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        '40% Off',
-                        style: TextStyle(
-                          fontSize: 36,
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Text(
-                        'Valid up to 31st Dec 2022',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Center(
+                margin: const EdgeInsets.all(12),
+                elevation: 5, // Slight shadow effect
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10.0), // Gap between image and card
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10), // Slight rounding of image
                         child: Image.asset(
-                          'assets/images/marinabay.jpg', // Replace with product image
-                          height: 150,
+                          offer.images[0],
+                          height: 120, // Adjust the height of the image
+                          width: 120, // Adjust the width of the image
+                          fit: BoxFit.cover,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        '*Terms & Conditions Applied',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(width: 10), // Add some space between image and text
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          offer.title,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'strats from 1.9 cr,All inclusive',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Trigger the popup on button press if needed
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) =>
-                                    const DescriptionScreen(),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 32, vertical: 12),
-                            ),
-                            child: const Text(
-                              'Buy Now',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
-              // What's Inside Section
-              const Text(
-                "What's Inside",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Discover your dream home with our limited-time  EV Homes Offer. Own a modern, spacious, and beautifully designed apartment in one of the city s most prestigious residential towers. Our homes are built with quality, luxury, and comfort in mind, offering breathtaking views, prime locations, and top-tier amenities.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
-              // View Similar Offers Button
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.grey),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  ),
-                  child: const Text(
-                    'View Similar Offers',
-                    style: TextStyle(color: Colors.black, fontSize: 16),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

@@ -124,7 +124,7 @@ class EnquiryFormState extends State<EnquiryForm> {
               // Submit Button
               FFButtonWidget(
                 onPressed: () {
-                  final snackBar = const SnackBar(
+                  const snackBar = SnackBar(
                     /// need to set following properties for best effect of awesome_snackbar_content
                     elevation: 0,
                     behavior: SnackBarBehavior.floating,

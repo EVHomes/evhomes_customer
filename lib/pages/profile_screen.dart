@@ -2,11 +2,9 @@ import 'package:ev_homes_customer/Wrappers/auth_wrapper.dart';
 import 'package:ev_homes_customer/core/services/auth_service.dart';
 import 'package:ev_homes_customer/flutterflow/flutter_flow_theme.dart';
 import 'package:ev_homes_customer/flutterflow/flutter_flow_widgets.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ev_homes_customer/pages/account_info_page.dart';
 import 'package:ev_homes_customer/pages/reset_password_screen.dart';
 import 'package:flutter/material.dart';
-
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -26,18 +24,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final loggedUser = Provider.of<SettingProvider>(context).loggedUser;
-
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-      // appBar: _buildAppBar(loggedUser),
       body: SafeArea(
         top: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // _buildUserInfo(loggedUser),
             _buildInfoTile(
               title: 'My Account Information',
               onTap: () => Navigator.push(
@@ -85,53 +79,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildLogoutButton(),
           ],
         ),
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(loggedUser) {
-    return AppBar(
-      backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-      automaticallyImplyLeading: false,
-      title: Text(
-        loggedUser?.name ?? 'Unknown',
-        style: FlutterFlowTheme.of(context).title1.override(
-              fontFamily: 'Manrope',
-              color: FlutterFlowTheme.of(context).primaryText,
-              letterSpacing: 0.0,
-            ),
-      ),
-      actions: [
-        CircleAvatar(
-          radius: 40,
-          child: ClipOval(
-            child: CachedNetworkImage(
-              fadeInDuration: const Duration(milliseconds: 500),
-              fadeOutDuration: const Duration(milliseconds: 500),
-              imageUrl: 'https://picsum.photos/seed/934/600',
-              fit: BoxFit.cover,
-              // width: 50.0,
-              // height: 50.0,
-            ),
-          ),
-        ),
-      ],
-      centerTitle: false,
-      elevation: 0.0,
-    );
-  }
-
-  Widget _buildUserInfo(loggedUser) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(16.0, 4.0, 16.0, 12.0),
-      child: Text(
-        loggedUser?.email ?? "tulvemahek@gmail.com",
-        style: FlutterFlowTheme.of(context).title3.override(
-              fontFamily: 'Manrope',
-              color: Colors.deepPurpleAccent,
-              letterSpacing: 0.0,
-              fontWeight: FontWeight.bold,
-            ),
       ),
     );
   }
@@ -186,10 +133,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Center(
         child: FFButtonWidget(
           onPressed: () async {
-            await AuthService().signOut();
+            await AuthService().signOut(); // Ensure the user is logged out
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => const AuthWrapper(),
+                builder: (context) => const AuthWrapper(), // Replace with your Login page widget
               ),
             );
           },
