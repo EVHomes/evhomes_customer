@@ -1,29 +1,28 @@
-import 'package:ev_homes_customer/pages/login_page.dart';
+import 'package:ev_homes_customer/pages/otp_verification.dart';
 import 'package:flutter/material.dart';
+import 'package:ev_homes_customer/pages/login_page.dart';
 
 class SignUpTabBarPage extends StatelessWidget {
   const SignUpTabBarPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: SignUpTabBar(
-            emailAddressTextController: TextEditingController(),
-            emailAddressFocusNode: FocusNode(),
-            emailAddressValidatorFocusNode: FocusNode(),
-            passwordController: TextEditingController(),
-            passwordFocusNode: FocusNode(),
-            passwordVisibility: false,
-            onPressPassVisibility: () {},
-            onPressSignup: () {
-              // Do signup action here
-            },
-            passwordValidator: (value) => null,
-            emailValidator: (value) => null,
-          ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SignUpTabBar(
+          emailAddressTextController: TextEditingController(),
+          emailAddressFocusNode: FocusNode(),
+          emailAddressValidatorFocusNode: FocusNode(),
+          passwordController: TextEditingController(),
+          passwordFocusNode: FocusNode(),
+          passwordVisibility: false,
+          onPressPassVisibility: () {},
+          onPressSignup: () {
+            // Do signup action here
+          },
+          passwordValidator: (value) => null,
+          emailValidator: (value) => null,
         ),
       ),
     );
@@ -96,33 +95,12 @@ class _SignUpTabBarState extends State<SignUpTabBar>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 15),
-
-              // Logo
-              // Center(
-              //   child: Image.asset(
-              //     'assets/images/evicon.png', // Replace with your logo path
-              //     width: 130, // Adjust width as needed
-              //   ),
-              // ),
-
-              // const SizedBox(height: 20),
-
-              // const Text(
-              //   'Sign up',
-              //   style: TextStyle(
-              //     fontSize: 32,
-              //     color: Colors.black,
-              //     fontWeight: FontWeight.bold,
-              //   ),
-              // ),
-              const SizedBox(height: 8),
-
               const Text(
                 'Create your account',
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.black,
-                   fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 32),
@@ -148,10 +126,13 @@ class _SignUpTabBarState extends State<SignUpTabBar>
                 controller: widget.emailAddressTextController,
                 focusNode: widget.emailAddressFocusNode,
                 keyboardType: TextInputType.emailAddress,
-                validator: widget.emailValidator ?? (value) {
+                validator: (value) {
+                  // Custom email validation logic
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
-                  } else if (!value.contains('@')) {
+                  } else if (!RegExp(
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                      .hasMatch(value)) {
                     return 'Invalid email address';
                   }
                   return null;
@@ -168,93 +149,102 @@ class _SignUpTabBarState extends State<SignUpTabBar>
               // Register Button with Shiny Animation
               Align(
                 alignment: Alignment.center,
-                child: Stack(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          widget.onPressSignup();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 80,
-                          vertical: 16,
+                child: GestureDetector(
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      // Navigate to OTP Page on successful validation
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const OtpVerificationPage(),
                         ),
-                        backgroundColor: const Color(0xFFFF745C), // Button color
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                      );
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 80,
+                            vertical: 16,
+                          ),
+                          backgroundColor: const Color(0xFFFF745C), // Button color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          'REGISTER',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      child: const Text(
-                        'REGISTER',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: AnimatedBuilder(
-                        animation: _shinyAnimation,
-                        builder: (context, child) {
-                          return ShaderMask(
-                            shaderCallback: (Rect bounds) {
-                              return LinearGradient(
-                                colors: [
-                                  Colors.white.withOpacity(0.0),
-                                  Colors.white.withOpacity(0.8), // Increased opacity
-                                  Colors.white.withOpacity(0.0),
-                                ],
-                                stops: [
-                                  _shinyAnimation.value - 0.2, // Adjusted stop values
-                                  _shinyAnimation.value,
-                                  _shinyAnimation.value + 0.2,
-                                ],
-                                begin: Alignment.topLeft, // Top left for 45 degrees
-                                end: Alignment.bottomRight, // Bottom right for 45 degrees
-                              ).createShader(bounds);
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                color: Colors.white.withOpacity(0.2),
+                      Positioned.fill(
+                        child: AnimatedBuilder(
+                          animation: _shinyAnimation,
+                          builder: (context, child) {
+                            return ShaderMask(
+                              shaderCallback: (Rect bounds) {
+                                return LinearGradient(
+                                  colors: [
+                                    Colors.white.withOpacity(0.0),
+                                    Colors.white.withOpacity(0.8),
+                                    Colors.white.withOpacity(0.0),
+                                  ],
+                                  stops: [
+                                    _shinyAnimation.value - 0.2,
+                                    _shinyAnimation.value,
+                                    _shinyAnimation.value + 0.2,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ).createShader(bounds);
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
               // Login prompt
-               Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Alreday have an account?",
-                  style: TextStyle(color: Colors.black),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(), // Ensure this is your actual signup page
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Sign up',
-                    style: TextStyle(color: Colors.blue),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Already have an account?",
+                    style: TextStyle(color: Colors.black),
                   ),
-                ),
-              ],
-            ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Login',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

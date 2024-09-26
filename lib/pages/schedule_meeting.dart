@@ -168,7 +168,7 @@ class _ScheduleMeetingState extends State<ScheduleMeeting> {
                       ),
                       elevation: 2,
                     ),
-                    child: Text('Send Request'),
+                    child: const Text('Send Request'),
                   ),
                   const SizedBox (width: 16),
                   ElevatedButton(
@@ -183,7 +183,7 @@ class _ScheduleMeetingState extends State<ScheduleMeeting> {
                       ), backgroundColor: Colors.blueAccent,
                       elevation: 2,
                     ),
-                    child: Text('Go To Location'),
+                    child: const Text('Go To Location'),
                   ),
                 ],
               ),

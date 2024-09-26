@@ -13,17 +13,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentPage = 0;
 
   final List<Widget> _pages = [
-    OnboardingPage(
+    const OnboardingPage(
       imagePath: 'assets/images/evicon.png',
       title: 'Welcome to EV Homes! \nE V Group is one of the leading and fast-growing Real Estate Companies in India.',
       height: 150.0,
     ),
-    OnboardingPage(
+    const OnboardingPage(
       imagePath: 'assets/images/image1.png',
       title: "Discover luxury homes designed by our expert engineers, ensuring quality and innovation in every detail.",
       height: 250.0,
     ),
-    OnboardingPage(
+    const OnboardingPage(
       imagePath: 'assets/images/image2.png',
       title: 'At EV Homes, we believe in transparency. \nFrom the first consultation to your new front door, we’re here to guide you every step of the way.',
       showButton: true,
@@ -123,26 +123,27 @@ class OnboardingPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
-                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                        const begin = Offset(1.0, 0.0); // Start from the right
-                        const end = Offset.zero; // End at the center
-                        const curve = Curves.easeInOut; // Animation curve
+                 Navigator.pushReplacement(
+  context,
+  PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(), // Replace with your destination page
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0); // Slide in from right
+      const end = Offset.zero; // Ends in the center
+      const curve = Curves.easeInOut;
 
-                        // Increase duration for a slower transition
-                        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                        var offsetAnimation = animation.drive(tween);
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      var offsetAnimation = animation.drive(tween);
 
-                        return SlideTransition(
-                          position: offsetAnimation,
-                          child: child,
-                        );
-                      },
-                      transitionDuration: const Duration(milliseconds: 650), // Adjust this duration as needed
-                    ),
-                  );
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 650), // Duration of the transition
+  ),
+);
+
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),

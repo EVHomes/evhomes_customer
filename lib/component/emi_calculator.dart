@@ -88,7 +88,7 @@ class _EmiCalculatorState extends State<EmiCalculator> {
   List<Map<String, double>> _getYearlySummary() {
     List<Map<String, double>> yearlySummary = [];
     int totalMonths = (_tenureYears * 12).toInt();
-    
+
     for (int year = 1; year <= _tenureYears; year++) {
       double yearInterest = 0;
       double yearPrincipal = 0;
@@ -265,6 +265,9 @@ class _EmiCalculatorState extends State<EmiCalculator> {
           max: max,
           divisions: (max - min).toInt(),
           label: value.toInt().toString(),
+          activeColor: Colors.blueAccent, // Change active color
+          inactiveColor: Colors.grey.shade300, // Change inactive color
+          thumbColor: Colors.blue, // Change thumb color
           onChanged: (double newValue) {
             setState(() {
               onChanged(newValue);
@@ -284,15 +287,15 @@ class _EmiCalculatorState extends State<EmiCalculator> {
         color: Colors.blueAccent,
         title: 'Principal\n₹${_loanAmount.toInt()}',
         radius: _touchedIndex == 0 ? 100 : 80,
-        titleStyle: const TextStyle(fontSize: 14, color: Colors.black),
+        titleStyle: const TextStyle(fontSize: 14, color: Colors.white),
         titlePositionPercentageOffset: 0.5,
       ),
       PieChartSectionData(
         value: _totalInterest,
-        color: const Color.fromARGB(255, 217, 255, 64),
+        color: const Color(0xFFD4A200), // A richer color for interest
         title: 'Interest\n₹${_totalInterest.toStringAsFixed(0)}',
         radius: _touchedIndex == 1 ? 100 : 80,
-        titleStyle: const TextStyle(fontSize: 14, color: Colors.black),
+        titleStyle: const TextStyle(fontSize: 14, color: Colors.white),
         titlePositionPercentageOffset: 0.5,
       ),
     ];

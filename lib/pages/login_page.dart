@@ -1,9 +1,42 @@
 import 'package:ev_homes_customer/pages/otp_verification.dart';
-import 'package:ev_homes_customer/pages/signup.dart'; // Make sure this imports correctly
+import 'package:ev_homes_customer/pages/signup.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
+  final _formKey = GlobalKey<FormState>(); // Form key for validation
+  final TextEditingController _phoneController = TextEditingController(); // Controller for the phone number
+  late AnimationController _controller;
+  late Animation<double> _shinyAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true); // Repeat animation
+
+    _shinyAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.linear,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +79,9 @@ class LoginPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Form(
+                key: _formKey, // Assign the form key
                 child: TextFormField(
+                  controller: _phoneController, // Use the controller
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     hintText: 'Phone Number',
@@ -67,10 +102,11 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   validator: (value) {
+                    // Validation logic
                     if (value == null || value.isEmpty) {
                       return 'Please enter your phone number';
-                    } else if (value.length != 10) {
-                      return 'Invalid phone number';
+                    } else if (value.length != 10 || !RegExp(r'^\d{10}$').hasMatch(value)) {
+                      return 'Invalid phone number. Must be 10 digits.';
                     }
                     return null;
                   },
@@ -80,51 +116,73 @@ class LoginPage extends StatelessWidget {
             const SizedBox(height: 30),
             Align(
               alignment: Alignment.center,
-              child: Stack(
-                children: [
-                  const SizedBox(height: 40.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        PageRouteBuilder(
-                          pageBuilder: (context, animation, secondaryAnimation) => const OtpVerificationPage(),
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            const begin = Offset(1.0, 0.0); // Start from the right
-                            const end = Offset.zero; // End at the center
-                            const curve = Curves.easeInOut; // Animation curve
-
-                            // Increase duration for a slower transition
-                            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                            var offsetAnimation = animation.drive(tween);
-
-                            return SlideTransition(
-                              position: offsetAnimation,
-                              child: child,
-                            );
-                          },
-                          transitionDuration: const Duration(milliseconds: 650), // Adjust this duration as needed
+              child: GestureDetector(
+                onTap: () {
+                  if (_formKey.currentState!.validate()) {
+                    // Navigate to OTP Page on successful validation
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const OtpVerificationPage(),
+                      ),
+                    );
+                  }
+                },
+                child: Stack(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {}, // Empty onPressed to handle tap via GestureDetector
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 80,
+                          vertical: 16,
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 80,
-                        vertical: 16,
+                        backgroundColor: const Color(0xFFFF745C), // Button color
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
-                      backgroundColor: const Color(0xFFFF745C), // Button color
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text(
-                      'LOGIN',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
+                      child: const Text(
+                        'REGISTER',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    Positioned.fill(
+                      child: AnimatedBuilder(
+                        animation: _shinyAnimation,
+                        builder: (context, child) {
+                          return ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return LinearGradient(
+                                colors: [
+                                  Colors.white.withOpacity(0.0),
+                                  Colors.white.withOpacity(0.8),
+                                  Colors.white.withOpacity(0.0),
+                                ],
+                                stops: [
+                                  _shinyAnimation.value - 0.2,
+                                  _shinyAnimation.value,
+                                  _shinyAnimation.value + 0.2,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ).createShader(bounds);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30),
+                                color: Colors.white.withOpacity(0.2),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),

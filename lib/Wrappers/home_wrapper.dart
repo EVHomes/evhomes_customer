@@ -113,7 +113,7 @@ class _HomeWrapperState extends State<HomeWrapper>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ScheduleMeeting(),
+                      builder: (context) => const ScheduleMeeting(),
                     ),
                   );
                 },

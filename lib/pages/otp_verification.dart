@@ -74,9 +74,9 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 activeFillColor: Colors.white,
                 inactiveFillColor: Colors.white,
                 selectedFillColor: Colors.white,
-                activeColor: Color(0xFF385A63),
-                inactiveColor: Color(0xFF385A63),
-                selectedColor: Color(0xFF385A63),
+                activeColor: const Color(0xFF385A63),
+                inactiveColor: const Color(0xFF385A63),
+                selectedColor: const Color(0xFF385A63),
               ),
               keyboardType: TextInputType.number,
               enableActiveFill: true,
@@ -92,7 +92,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFF745C),
+                backgroundColor: const Color(0xFFFF745C),
                 padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
