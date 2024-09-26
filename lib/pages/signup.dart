@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:ev_homes_customer/core/theme_colors.dart';
 import 'package:ev_homes_customer/pages/otp_verification.dart';
+import 'package:flutter/material.dart';
+import 'package:ev_homes_customer/pages/login_page.dart';
 
 class SignUpTabBarPage extends StatelessWidget {
   const SignUpTabBarPage({super.key});
@@ -8,33 +8,22 @@ class SignUpTabBarPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
       backgroundColor: Colors.white,
-      body: SignUpTabBar(
-        emailAddressTextController: TextEditingController(),
-        emailAddressFocusNode: FocusNode(),
-        emailAddressValidatorFocusNode: FocusNode(),
-        passwordController: TextEditingController(),
-        passwordFocusNode: FocusNode(),
-        passwordVisibility: false,
-        onPressPassVisibility: () {},
-        onPressSignup: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const OtpVerificationPage(phoneNumber: '')), // Pass an empty phone number for now
-          );
-        },
-        passwordValidator: (value) => null,
-        emailValidator: (value) => null,
+      body: SafeArea(
+        child: SignUpTabBar(
+          emailAddressTextController: TextEditingController(),
+          emailAddressFocusNode: FocusNode(),
+          emailAddressValidatorFocusNode: FocusNode(),
+          passwordController: TextEditingController(),
+          passwordFocusNode: FocusNode(),
+          passwordVisibility: false,
+          onPressPassVisibility: () {},
+          onPressSignup: () {
+            // Do signup action here
+          },
+          passwordValidator: (value) => null,
+          emailValidator: (value) => null,
+        ),
       ),
     );
   }
@@ -67,326 +56,277 @@ class SignUpTabBar extends StatefulWidget {
   });
 
   @override
-  // ignore: library_private_types_in_public_api
   _SignUpTabBarState createState() => _SignUpTabBarState();
 }
 
-class _SignUpTabBarState extends State<SignUpTabBar> {
+class _SignUpTabBarState extends State<SignUpTabBar>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
+  late AnimationController _animationController;
+  late Animation<double> _shinyAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize the animation controller for the shiny animation
+    _animationController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 2))
+          ..repeat(reverse: true);
+
+    _shinyAnimation =
+        Tween<double>(begin: -1, end: 2).animate(_animationController);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: const AlignmentDirectional(
-        0.0,
-        -1.0,
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(
-          24.0,
-          16.0,
-          24.0,
-          24.0,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 15),
+              const Text(
+                'Create your account',
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Name field
+              _buildTextField(
+                label: 'Name',
+                icon: Icons.person,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your Name';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Email field
+              _buildTextField(
+                label: 'Email address',
+                icon: Icons.email,
+                controller: widget.emailAddressTextController,
+                focusNode: widget.emailAddressFocusNode,
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  // Custom email validation logic
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  } else if (!RegExp(
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                      .hasMatch(value)) {
+                    return 'Invalid email address';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Phone number field
+              _buildPhoneNumberField(),
+
+              const SizedBox(height: 32),
+
+              // Register Button with Shiny Animation
+              Align(
+                alignment: Alignment.center,
+                child: GestureDetector(
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      // Navigate to OTP Page on successful validation
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const OtpVerificationPage(),
+                        ),
+                      );
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 80,
+                            vertical: 16,
+                          ),
+                          backgroundColor: const Color(0xFFFF745C), // Button color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          'REGISTER',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Positioned.fill(
+                        child: AnimatedBuilder(
+                          animation: _shinyAnimation,
+                          builder: (context, child) {
+                            return ShaderMask(
+                              shaderCallback: (Rect bounds) {
+                                return LinearGradient(
+                                  colors: [
+                                    Colors.white.withOpacity(0.0),
+                                    Colors.white.withOpacity(0.8),
+                                    Colors.white.withOpacity(0.0),
+                                  ],
+                                  stops: [
+                                    _shinyAnimation.value - 0.2,
+                                    _shinyAnimation.value,
+                                    _shinyAnimation.value + 0.2,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ).createShader(bounds);
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Login prompt
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Already have an account?",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Login',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 230.0,
-                  height: 40.0,
-                  decoration: BoxDecoration(
-                    color: ThemeColors.secondaryBackground,
-                  ),
-                ),
-                
-                const Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(
-                    0.0,
-                    4.0,
-                    0.0,
-                    24.0,
-                  ),
-                  child: Text(
-                    style: TextStyle(
-                      fontSize:  18,
-                    ),
-                    ' create an new account',
-                    textAlign: TextAlign.justify,
-                  ),
-                ),
+      ),
+    );
+  }
 
-                // name textfield
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: TextFormField(
-                      autofocus: true,
-                      autofillHints: const [AutofillHints.name],
-                      obscureText: false,
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        prefixIcon: const Icon(Icons.person),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                            width: 1.0,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                            width: 1.0,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.deepPurpleAccent,
-                            width: 1.0,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.redAccent,
-                            width: 1.0,
-                          ),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.redAccent,
-                            width: 1.0,
-                          ),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.fromLTRB(
-                          0,
-                          16.0,
-                          0,
-                          4.0,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your name';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ),
-
-                // email textfield
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: TextFormField(
-                      controller: widget.emailAddressTextController,
-                      focusNode: widget.emailAddressFocusNode,
-                      autofocus: true,
-                      autofillHints: const [AutofillHints.email],
-                      obscureText: false,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: const Icon(Icons.email),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                            width: 1.0,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                            width: 1.0,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.deepPurpleAccent,
-                            width: 1.0,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.redAccent,
-                            width: 1.0,
-                          ),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            color: Colors.redAccent,
-                            width: 1.0,
-                          ),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.only(
-                          right: 16.0,
-                          bottom: 4.0,
-                        ),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 16,
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        } else if (!value.contains('@')) {
-                          return 'Invalid email address';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ),
-
-               // phone number textfield
-Padding(
-  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
-  child: SizedBox(
-    width: double.infinity,
-    child: TextFormField(
-      autofocus: true,
-      autofillHints: const [AutofillHints.telephoneNumber],
-      obscureText: false,
+  // Phone number text field with +91 prefix, phone icon, and custom styling
+  Widget _buildPhoneNumberField() {
+    return TextFormField(
+      keyboardType: TextInputType.phone,
+      maxLength: 10,
+      style: const TextStyle(color: Colors.black),
       decoration: InputDecoration(
         labelText: 'Phone Number',
-        prefixIcon: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(width: 15,),
-            Icon(Icons.call),
-            SizedBox(width: 4), // Add a small space between the icon and the text
-            VerticalDivider(thickness: 1, color: Colors.grey),
-            SizedBox(width: 4), // Add a small space between the divider and the text
-            Text(
-              '+91',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: const BorderSide(
-            color: Colors.grey,
-            width: 1.0,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: const BorderSide(
-            color: Colors.grey,
-            width: 1.0,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: const BorderSide(
-            color: Colors.deepPurpleAccent,
-            width: 1.0,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 1.0,
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 1.0,
-          ),
-        ),
+        labelStyle: const TextStyle(color: Colors.black),
+        prefixIcon: const Icon(Icons.phone, color: Colors.black),
+        prefixText: '+91 ',
+        prefixStyle: const TextStyle(color: Colors.black),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.fromLTRB(
-          0,
-          16.0,
-          0,
-          4.0,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Colors.black),
         ),
-      ),
-      style: const TextStyle(
-        color: Color.fromARGB(
-          252,
-          0,
-          0,
-          0,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Colors.black),
         ),
-        fontSize: 16,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Colors.black, width: 2.0),
+        ),
+        counterText: '', // Removes the '0/10' counter text
       ),
-      keyboardType: TextInputType.phone,
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please enter your phone number';
         } else if (value.length != 10) {
-          return 'Invalid phone number';
+          return 'Phone number must be 10 digits';
         }
         return null;
       },
-    ),
-  ),
-),
+    );
+  }
 
-                // request btn
-Align(
-  alignment: const AlignmentDirectional(0.0, 0.0),
-  child: Padding(
-    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
-    child: ElevatedButton(
-      onPressed: () {
-        if (_formKey.currentState!.validate()) {
-          widget.onPressSignup();
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const OtpVerificationPage()),
-          );
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white, // Button text color
-        backgroundColor: Colors.purple, // Button background color
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+  // Helper to create custom-styled text fields
+  Widget _buildTextField({
+    required String label,
+    required IconData icon,
+    TextEditingController? controller,
+    FocusNode? focusNode,
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Colors.black),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.black),
+        prefixIcon: Icon(icon, color: Colors.black),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Colors.black, width: 2.0),
         ),
       ),
-      child: const Text(
-        'sign up',
-        style: TextStyle(
-          fontSize: 16,
-        ),
-      ),
-    ),
-  ),
-),
-              ],
-            ),
-          ),
-        ),
-      ),
+      validator: validator,
     );
   }
 }

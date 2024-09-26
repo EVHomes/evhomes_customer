@@ -1,24 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
-class ScheduleMeetingPage extends StatefulWidget {
-  const ScheduleMeetingPage({super.key});
+import 'package:url_launcher/url_launcher.dart'; // For opening URLs
+
+class ScheduleMeeting extends StatefulWidget {
+  const ScheduleMeeting({super.key});
 
   @override
-  _ScheduleMeetingPageState createState() => _ScheduleMeetingPageState();
+  _ScheduleMeetingState createState() => _ScheduleMeetingState();
 }
 
-class _ScheduleMeetingPageState extends State<ScheduleMeetingPage> {
-  TextEditingController dateTimeController = TextEditingController();
+class _ScheduleMeetingState extends State<ScheduleMeeting> {
+  DateTime? selectedDateTime;
   String? selectedPlace;
+  String? selectedPurpose;
+  final _formKey = GlobalKey<FormState>();
+  final _dateController = TextEditingController();
 
-  @override
-  void dispose() {
-    dateTimeController.dispose();
-    super.dispose();
+  final places = {
+    'Nine Square Office': 'https://maps.app.goo.gl/T7q46CqTnUFwSHc28',
+    'Head Office': 'https://maps.app.goo.gl/bkMsGhfcYfcdk3Cm9'
+  };
+
+  final purposes = ['Pricing', 'Booking', 'Negotiation', 'Payment'];
+
+  // Function to launch URL using Uri
+  Future<void> _launchURL(String url) async {
+    Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication); // Use external application mode for Google Maps
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
-  Future<void> _selectDateTime() async {
-    DateTime? pickedDate = await showDatePicker(
+  // Function to select both date and time
+  Future<void> _selectDateTime(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
@@ -26,140 +42,150 @@ class _ScheduleMeetingPageState extends State<ScheduleMeetingPage> {
     );
 
     if (pickedDate != null) {
-      TimeOfDay? pickedTime = await showTimePicker(
+      final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
       );
 
       if (pickedTime != null) {
-        final DateTime selectedDateTime = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
-
         setState(() {
-          dateTimeController.text =
-              "${"${selectedDateTime.toLocal()}".split(' ')[0]} ${pickedTime.format(context)}";
+          selectedDateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          _dateController.text = '${pickedDate.day}/${pickedDate.month}/${pickedDate.year} ${pickedTime.hour}:${pickedTime.minute}';
         });
-      }
-    }
-  }
-
-  Future<void> _launchGoogleMaps(String place) async {
-    if (place.isNotEmpty) {
-      Uri.encodeComponent(place);
-      const String url = 'https://maps.app.goo.gl/VywyURbZko3YtRqw7';
-      try {
-        if (await canLaunchUrl(Uri.parse(url))) {
-          await launchUrl(Uri.parse(url));
-        } else {
-          throw 'Could not launch $url';
-        }
-      } catch (e) {
-        print('Error launching URL: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error opening Google Maps')),
-        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> places = [
-      'Plot Number 16, Juhu Nagar, Sector 9, Vashi, Navi Mumbai, Maharashtra 400703',
-      'VS2-24, Ganesh Marg, Juhu Nagar, Juhu Village, Sector 10, Vashi, Navi Mumbai, Maharashtra 400703',
-      '212, Vardhaman Chambers, Vashi Flyover, Sector 17, Vashi, Navi Mumbai, Maharashtra 400703'
-    ];
-
-    final List<String> purpose = [
-      'Pricing',
-      'Booking',
-      'Negotiation',
-      'Payment'
-    ];
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Schedule a Meeting'),
+        title: const Text('Schedule Meeting'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Date and Time field
-              TextField(
-                controller: dateTimeController,
+              // Date & Time Picker
+              TextFormField(
+                controller: _dateController,
                 decoration: const InputDecoration(
-                  labelText: 'Date & Time',
+                  labelText: 'Select Date & Time',
                   border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today),
+                  prefixIcon: Icon(Icons.calendar_today),
                 ),
+                onTap: () => _selectDateTime(context),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a date and time';
+                  }
+                  return null;
+                  
+                },
                 readOnly: true,
-                onTap: _selectDateTime,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              // Place field
+              // Place Dropdown
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Place',
-                  suffixIcon: Icon(Icons.add_location),
-                  border: OutlineInputBorder(),
-                ),
-                items: places.map((String place) {
-                  return DropdownMenuItem<String>(
-                    value: place,
-                    child: Text(place),
-                  );
-                }).toList(),
+                value: selectedPlace,
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedPlace = newValue;
                   });
                 },
+                items: places.keys.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                decoration: const InputDecoration(
+                  labelText: 'Select Place',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.location_on),
+                ),
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a place';
+                  }
+                  return null;
+                },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              // Purpose field
+              // Purpose Dropdown
               DropdownButtonFormField<String>(
+                value: selectedPurpose,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedPurpose = newValue;
+                  });
+                },
+                items: purposes.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
                 decoration: const InputDecoration(
                   labelText: 'Purpose',
                   border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.note),
                 ),
-                items: purpose.map((String purpose) {
-                  return DropdownMenuItem<String>(
-                    value: purpose,
-                    child: Text(purpose),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {},
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a purpose';
+                  }
+                  return null;
+                },
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 24),
 
-              // Schedule button
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    _launchGoogleMaps(
-                        " "); // Open Google Maps when button pressed
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Request has been sent')),
-                    );
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 30, 155, 78),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              // Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Request Sent'),
+                        ));
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: const Text('Send Request'),
                   ),
-                  child: Text('Send Request'),
-                ),
+                  const SizedBox (width: 16),
+                  ElevatedButton(
+                    onPressed: selectedPlace == null
+                        ? null
+                        : () {
+                            _launchURL (places[selectedPlace]!);
+                          },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ), backgroundColor: Colors.blueAccent,
+                      elevation: 2,
+                    ),
+                    child: const Text('Go To Location'),
+                  ),
+                ],
               ),
             ],
           ),

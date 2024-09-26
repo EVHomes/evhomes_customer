@@ -3,8 +3,6 @@ import 'package:ev_homes_customer/pages/enquiry_form.dart';
 import 'package:ev_homes_customer/pages/home_page.dart';
 import 'package:ev_homes_customer/pages/my_meetings.dart';
 import 'package:ev_homes_customer/pages/offer.dart';
-// import 'package:ev_homes_customer/pages/offer_pop_up_page.dart';
-// import 'package:ev_homes_customer/pages/offer_pop_up_page.dart';
 import 'package:ev_homes_customer/pages/schedule_meeting.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +26,7 @@ class _HomeWrapperState extends State<HomeWrapper>
     const HomeScreen(),
     MyMeetings(),
     const ChatPage(),
-    OfferPage(),  // Add your Offer page here
+    const OfferDetailPage(showDiolog: true), // Add your Offer page here
   ];
 
   void _onItemTapped(int index) {
@@ -80,7 +78,9 @@ class _HomeWrapperState extends State<HomeWrapper>
     return Stack(
       children: [
         Container(child: _pages[_currentIndex]),
-        if (_isMenuVisible)
+
+        // Conditionally render background dimming when menu is visible
+        if (_isMenuVisible && _currentIndex != 3)
           GestureDetector(
             onTap: () {
               setState(() {
@@ -91,13 +91,13 @@ class _HomeWrapperState extends State<HomeWrapper>
               opacity: _isMenuVisible ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),
               child: Container(
-                color: Colors.black.withOpacity(
-                  0.4,
-                ),
+                color: Colors.black.withOpacity(0.4),
               ),
             ),
           ),
-        if (_isMenuVisible) ...[
+
+        // Conditionally render the menu buttons
+        if (_isMenuVisible && _currentIndex != 3) ...[
           Positioned(
             bottom: 170.0,
             right: 16.0,
@@ -113,7 +113,7 @@ class _HomeWrapperState extends State<HomeWrapper>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ScheduleMeetingPage(),
+                      builder: (context) => const ScheduleMeeting(),
                     ),
                   );
                 },
@@ -152,80 +152,86 @@ class _HomeWrapperState extends State<HomeWrapper>
             ),
           ),
         ],
-        Positioned(
-          bottom: 20,
-          left: 20,
-          right: 20,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                NavItem(
-                  label: "Meetings",
-                  icon: FluentIcons.stack_20_regular,
-                  index: 1,
-                  onTap: () {
-                    _onItemTapped(1);
-                  },
-                  currentIndex: _currentIndex,
-                ),
-                NavItem(
-                  label: "Home",
-                  icon: FluentIcons.home_20_regular,
-                  index: 0,
-                  onTap: () {
-                    _onItemTapped(0);
-                  },
-                  currentIndex: _currentIndex,
-                ),
-                NavItem(
-                  label: "Chat",
-                  icon: FluentIcons.chat_empty_20_regular,
-                  index: 2,
-                  onTap: () {
-                    _onItemTapped(2);
-                  },
-                  currentIndex: _currentIndex,
-                ),
-                NavItem(
-                  label: "Offer",
-                  icon: FluentIcons.gift_20_regular,
-                  index: 3,
-                  onTap: () {
-                    _onItemTapped(3);
-                  },
-                  currentIndex: _currentIndex,
-                ),
-              ],
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 100.0,
-          right: 20.0,
-          child: FloatingActionButton(
-            backgroundColor: Colors.deepPurpleAccent,
-            elevation: 10,
-            onPressed: _toggleMenu,
-            tooltip: 'Menu',
-            child: const Icon(
-              FluentIcons.add_24_regular,
-              color: Colors.white,
+
+        // Conditionally render the navbar if not on the Offer page
+        if (_currentIndex != 3)
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  NavItem(
+                    label: "Meetings",
+                    icon: FluentIcons.people_20_regular, // Meeting icon
+                    index: 1,
+                    onTap: () {
+                      _onItemTapped(1);
+                    },
+                    currentIndex: _currentIndex,
+                  ),
+                  NavItem(
+                    label: "Home",
+                    icon: FluentIcons.home_20_regular,
+                    index: 0,
+                    onTap: () {
+                      _onItemTapped(0);
+                    },
+                    currentIndex: _currentIndex,
+                  ),
+                  NavItem(
+                    label: "Chat",
+                    icon: FluentIcons.chat_empty_20_regular,
+                    index: 2,
+                    onTap: () {
+                      _onItemTapped(2);
+                    },
+                    currentIndex: _currentIndex,
+                  ),
+                  NavItem(
+                    label: "Offer",
+                    icon: FluentIcons.gift_20_regular,
+                    index: 3,
+                    onTap: () {
+                      _onItemTapped(3);
+                    },
+                    currentIndex: _currentIndex,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+
+        // Conditionally render the floating action button if not on the Offer page
+        if (_currentIndex != 3 && _currentIndex != 2)
+          Positioned(
+            bottom: 100.0,
+            right: 20.0,
+            child: FloatingActionButton(
+              backgroundColor: Colors.deepPurpleAccent,
+              elevation: 10,
+              onPressed: _toggleMenu,
+              tooltip: 'Menu',
+              child: const Icon(
+                FluentIcons.add_24_regular,
+                color: Colors.white,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -256,15 +262,15 @@ class NavItem extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color:
-                currentIndex == index ? Colors.deepPurpleAccent : Colors.grey,
+            color: currentIndex == index ? Colors.deepPurpleAccent : Colors.grey,
           ),
           Text(
             label,
             style: TextStyle(
               fontWeight: FontWeight.normal,
-              color:
-                  currentIndex == index ? Colors.deepPurpleAccent : Colors.grey,
+              color: currentIndex == index
+                  ? Colors.deepPurpleAccent
+                  : Colors.grey,
               fontSize: 12,
             ),
           ),

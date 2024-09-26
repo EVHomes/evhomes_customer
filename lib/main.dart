@@ -1,5 +1,6 @@
+import 'package:ev_homes_customer/pages/start_screen.dart';
 import 'package:flutter/material.dart';
-import 'pages/login_page.dart';
+// import 'pages/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +22,7 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginScreen(), // Set LoginPage as the home page
+      home: const OnboardingScreen(), // Set LoginPage as the home page
     );
   }
 }

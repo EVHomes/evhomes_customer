@@ -44,7 +44,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.purple,
+                color:  Color(0xFFFF745C),
               ),
             ),
             const SizedBox(height: 20),
@@ -74,9 +74,9 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 activeFillColor: Colors.white,
                 inactiveFillColor: Colors.white,
                 selectedFillColor: Colors.white,
-                activeColor: Colors.purple,
-                inactiveColor: Colors.purple.shade200,
-                selectedColor: Colors.purple,
+                activeColor: const Color(0xFF385A63),
+                inactiveColor: const Color(0xFF385A63),
+                selectedColor: const Color(0xFF385A63),
               ),
               keyboardType: TextInputType.number,
               enableActiveFill: true,
@@ -92,7 +92,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
+                backgroundColor: const Color(0xFFFF745C),
                 padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -131,7 +131,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
               child: const Text(
                 'RESEND OTP',
                 style: TextStyle(
-                  color: Colors.purple,
+                  color: Color(0xFFFF745C),
                   fontWeight: FontWeight.bold,
                 ),
               ),

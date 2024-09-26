@@ -1,6 +1,7 @@
 
 import 'package:ev_homes_customer/Wrappers/home_wrapper.dart';
 import 'package:ev_homes_customer/pages/login_page.dart';
+// import 'package:ev_homes_customer/pages/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,7 @@ class AuthWrapper extends StatelessWidget {
           return const HomeWrapper();
         } else {
           // If the user is not logged in, show the auth page
-          return LoginScreen();
+          return const LoginPage();
         }
       },
     );
