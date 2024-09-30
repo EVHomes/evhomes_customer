@@ -1,5 +1,6 @@
 import 'package:ev_homes_customer/pages/otp_verification.dart';
 import 'package:ev_homes_customer/pages/signup.dart';
+import 'package:ev_homes_customer/provider/dataprovider.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -11,8 +12,12 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
+  String? _phoneNumber;
   final _formKey = GlobalKey<FormState>(); // Form key for validation
-  final TextEditingController _phoneController = TextEditingController(); // Controller for the phone number
+  final TextEditingController _phoneController = TextEditingController();
+  final FocusNode phoneNode = FocusNode();
+  final Dataprovider _firestoreService =
+      Dataprovider(); // Controller for the phone number
   late AnimationController _controller;
   late Animation<double> _shinyAnimation;
 
@@ -83,6 +88,7 @@ class _LoginPageState extends State<LoginPage>
                 child: TextFormField(
                   controller: _phoneController, // Use the controller
                   keyboardType: TextInputType.phone,
+                  autofocus: true,
                   decoration: InputDecoration(
                     hintText: 'Phone Number',
                     filled: true,
@@ -94,7 +100,8 @@ class _LoginPageState extends State<LoginPage>
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: Colors.black, width: 2.0),
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 2.0),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -105,7 +112,8 @@ class _LoginPageState extends State<LoginPage>
                     // Validation logic
                     if (value == null || value.isEmpty) {
                       return 'Please enter your phone number';
-                    } else if (value.length != 10 || !RegExp(r'^\d{10}$').hasMatch(value)) {
+                    } else if (value.length != 10 ||
+                        !RegExp(r'^\d{10}$').hasMatch(value)) {
                       return 'Invalid phone number. Must be 10 digits.';
                     }
                     return null;
@@ -117,33 +125,56 @@ class _LoginPageState extends State<LoginPage>
             Align(
               alignment: Alignment.center,
               child: GestureDetector(
-                onTap: () {
+                onTap: () async {
                   if (_formKey.currentState!.validate()) {
-                    // Navigate to OTP Page on successful validation
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const OtpVerificationPage(),
-                      ),
-                    );
+                    String phone = _phoneController.text;
+
+                    // Check if the phone number exists in the database
+                    bool phoneExists =
+                        await _firestoreService.checkPhoneNumberExists(phone);
+                    _phoneNumber = _phoneController.text;
+                    if (phoneExists) {
+                      // Redirect to OTP Verification Page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => OtpVerificationPage(
+                                phoneNumber: _phoneNumber!)),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please sign up!'),
+                          backgroundColor: Color.fromARGB(255, 61, 60, 60),
+                        ),
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpTabBarPage(),
+                        ),
+                      );
+                    }
                   }
                 },
                 child: Stack(
                   children: [
                     ElevatedButton(
-                      onPressed: () {}, // Empty onPressed to handle tap via GestureDetector
+                      onPressed:
+                          () {}, // Empty onPressed to handle tap via GestureDetector
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 80,
                           vertical: 16,
                         ),
-                        backgroundColor: const Color(0xFFFF745C), // Button color
+                        backgroundColor:
+                            const Color(0xFFFF745C), // Button color
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
                       child: const Text(
-                        'REGISTER',
+                        'LOG IN',
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.white,
@@ -198,7 +229,8 @@ class _LoginPageState extends State<LoginPage>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const SignUpTabBarPage(), // Ensure this is your actual signup page
+                        builder: (context) =>
+                            const SignUpTabBarPage(), // Ensure this is your actual signup page
                       ),
                     );
                   },

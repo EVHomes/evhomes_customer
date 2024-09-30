@@ -4,7 +4,6 @@ import 'package:ev_homes_customer/core/models/bhk_model.dart';
 import 'package:ev_homes_customer/core/models/project_model.dart';
 import 'package:ev_homes_customer/flutterflow/flutter_flow_theme.dart';
 import 'package:ev_homes_customer/flutterflow/flutter_flow_widgets.dart';
-
 import 'package:flutter/material.dart';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -14,7 +13,6 @@ import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-
 
 const String name = 'Marina Bay';
 const String description =
@@ -278,8 +276,7 @@ class _DescriptionScreenState extends State<DescriptionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
-                    padding:
-                        EdgeInsetsDirectional.symmetric(horizontal: 20),
+                    padding: EdgeInsetsDirectional.symmetric(horizontal: 20),
                     child: Text(
                       'Configuration',
                       style: TextStyle(
