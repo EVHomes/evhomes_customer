@@ -11,6 +11,9 @@ class ProjectModel {
   final List<AmenitiyModel> amenities;
   final String locationName;
   final String locationLink;
+  final String? contactNumber;
+  String? brochure;
+  final String? countryCode;
 
   ProjectModel({
     required this.name,
@@ -21,6 +24,9 @@ class ProjectModel {
     required this.amenities,
     required this.locationName,
     required this.locationLink,
+    this.contactNumber,
+   this.brochure,
+    this.countryCode = "+91",
   });
 
   factory ProjectModel.fromFirestore(DocumentSnapshot doc) {
@@ -31,12 +37,17 @@ class ProjectModel {
       throw Exception("Document data is null");
     }
 
+    print("project data: $json");
+    print(json);
     return ProjectModel(
       name: json["name"] ?? '',
       locationName: json["locationName"] ?? '',
       locationLink: json["locationLink"] ?? '',
       description: json["description"] ?? '',
       showCaseImage: json["showCaseImage"] ?? '',
+      contactNumber: json["contactNumber"] ?? '',
+      brochure: json["brochure"] ?? '',
+      countryCode: json["countryCode"] ?? '',
       carouselImages: List<String>.from(json["carouselImages"] ?? []),
       bhkList: (json["bhkList"] as List<dynamic>?)
               ?.map((ele) => BhkModel.fromJson(ele as Map<String, dynamic>))
@@ -57,14 +68,20 @@ class ProjectModel {
       locationLink: json["locationLink"] ?? '',
       description: json["description"] ?? '',
       showCaseImage: json["showCaseImage"] ?? '',
+      contactNumber: json["contactNumber"] ?? '',
+      brochure: json["brochure"] ?? '',
+      countryCode: json["countryCode"] ?? '',
       carouselImages: List<String>.from(json["carouselImages"] ?? []),
       bhkList: (json["bhkList"] as List<dynamic>?)
-              ?.map((ele) => BhkModel.fromJson(ele as Map<String, dynamic>))
+              ?.map(
+                (ele) => BhkModel.fromJson(ele as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       amenities: (json["amenities"] as List<dynamic>?)
               ?.map(
-                  (ele) => AmenitiyModel.fromJson(ele as Map<String, dynamic>))
+                (ele) => AmenitiyModel.fromJson(ele as Map<String, dynamic>),
+              )
               .toList() ??
           [],
     );
@@ -78,6 +95,9 @@ class ProjectModel {
       "description": description,
       "showCaseImage": showCaseImage,
       "carouselImages": carouselImages,
+      "contactNumber": contactNumber,
+      "brochure": brochure,
+      "countryCode": countryCode,
       "bhkList": bhkList.map((e) => e.toJson()).toList(),
       "amenities": amenities.map((e) => e.toJson()).toList(),
     };
