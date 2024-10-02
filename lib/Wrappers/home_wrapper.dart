@@ -262,15 +262,15 @@ class NavItem extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: currentIndex == index ? Colors.deepPurpleAccent : Colors.grey,
+            color:
+                currentIndex == index ? Colors.deepPurpleAccent : Colors.grey,
           ),
           Text(
             label,
             style: TextStyle(
               fontWeight: FontWeight.normal,
-              color: currentIndex == index
-                  ? Colors.deepPurpleAccent
-                  : Colors.grey,
+              color:
+                  currentIndex == index ? Colors.deepPurpleAccent : Colors.grey,
               fontSize: 12,
             ),
           ),
