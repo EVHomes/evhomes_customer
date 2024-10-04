@@ -1,4 +1,5 @@
 import 'package:ev_homes_customer/Wrappers/home_wrapper.dart';
+import 'package:ev_homes_customer/pages/AnimatedGradientScreen.dart';
 // import 'package:ev_homes_customer/pages/home_wrapper.dart'; // Import your HomeWrapper
 import 'package:ev_homes_customer/pages/offer_pop_up_page.dart';
 import 'package:ev_homes_customer/pages/offers_description.dart';
@@ -32,8 +33,8 @@ class _OfferDetailPageState extends State<OfferDetailPage> {
     Offer(
       title: "New Project!!",
       images: [
-        'assets/images/mb1.jpg',
-        'assets/images/mb2.jpg',
+        'assets/images/whats_new_1.jpeg',
+        'assets/images/whats_new_2.jpeg',
         'assets/images/mb3.jpg'
       ],
       description: "Grab the opportunity and win high offers on booking.",
@@ -41,7 +42,7 @@ class _OfferDetailPageState extends State<OfferDetailPage> {
     ),
     Offer(
       title: "Get 20% off on booking",
-      images: ['assets/images/mb2.jpg', 'assets/images/mb2.jpg'],
+      images: ['assets/images/whats_new_2.jpeg','assets/images/whats_new_2.jpeg',],
       description: "Grab the opportunity and win high offers on booking.",
       terms: "Terms and conditions apply. Valid until 30th September only",
     ),
@@ -57,7 +58,7 @@ class _OfferDetailPageState extends State<OfferDetailPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showDialog(
           context: context,
-          builder: (BuildContext context) => const SpecialOfferPopup(),
+          builder: (BuildContext context) => const NavratriOfferPopup(),
         );
       });
     }
@@ -76,11 +77,15 @@ class _OfferDetailPageState extends State<OfferDetailPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop, // Handle back button press
-      child: Scaffold(
+      child:Stack(
+        children: [
+          AnimatedGradient(),
+      Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("Ongoing Offers"),
-          backgroundColor: const Color.fromARGB(255, 250, 250, 250),
-          foregroundColor: Colors.black,
+          backgroundColor:  Colors.transparent,
+          foregroundColor: Colors.white,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back), // Back button icon
             onPressed: () {
@@ -119,6 +124,7 @@ class _OfferDetailPageState extends State<OfferDetailPage> {
                 );
               },
               child: Card(
+                color: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15), // Circular corners
                 ),
@@ -146,16 +152,19 @@ class _OfferDetailPageState extends State<OfferDetailPage> {
                           offer.title,
                           style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
+                               ),
+                            ),
+                          ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+                        

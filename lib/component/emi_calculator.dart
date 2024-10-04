@@ -1,34 +1,55 @@
+
+import 'package:ev_homes_customer/pages/AnimatedGradientScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import 'dart:math';
 
 class EmiCalculator extends StatefulWidget {
-  const EmiCalculator({super.key});
+  const EmiCalculator({Key? key}) : super(key: key);
 
   @override
   _EmiCalculatorState createState() => _EmiCalculatorState();
 }
 
-class _EmiCalculatorState extends State<EmiCalculator> {
-  double _loanAmount = 100000;
-  double _interestRate = 7.0;
-  double _tenureYears = 1; // Changed to years
+class _EmiCalculatorState extends State<EmiCalculator> with SingleTickerProviderStateMixin {
+  double _loanAmount = 0;
+  double _interestRate = 0;
+  double _tenureYears = 0;
   double _emi = 0;
   double _totalInterest = 0;
-  int _touchedIndex = -1;
-
-  List<Map<String, double>> amortizationSchedule = [];
 
   late TextEditingController _loanAmountController;
   late TextEditingController _interestRateController;
   late TextEditingController _tenureController;
 
+  String? _loanAmountError;
+  String? _interestRateError;
+  String? _tenureError;
+
+  List<Map<String, double>> amortizationSchedule = [];
+
+  final currencyFormat = NumberFormat("#,##0.00", "en_US");
+
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
   @override
   void initState() {
     super.initState();
-    _loanAmountController = TextEditingController(text: _loanAmount.toStringAsFixed(0));
-    _interestRateController = TextEditingController(text: _interestRate.toStringAsFixed(1));
-    _tenureController = TextEditingController(text: _tenureYears.toStringAsFixed(0));
+    _loanAmountController = TextEditingController();
+    _interestRateController = TextEditingController();
+    _tenureController = TextEditingController();
+
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _animationController.repeat(reverse: true);
   }
 
   @override
@@ -36,187 +57,139 @@ class _EmiCalculatorState extends State<EmiCalculator> {
     _loanAmountController.dispose();
     _interestRateController.dispose();
     _tenureController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
   void _calculateEMI() {
+    FocusScope.of(context).unfocus();
     double principal = double.tryParse(_loanAmountController.text) ?? 0;
     double rate = double.tryParse(_interestRateController.text) ?? 0;
     double tenureYears = double.tryParse(_tenureController.text) ?? 0;
-    double tenureMonths = tenureYears * 12; // Convert years to months
 
-    if (principal > 0 && rate > 0 && tenureYears > 0) {
-      double monthlyInterestRate = rate / 12 / 100;
-      _emi = (principal * monthlyInterestRate * pow(1 + monthlyInterestRate, tenureMonths)) /
-          (pow(1 + monthlyInterestRate, tenureMonths) - 1);
-      double totalAmount = _emi * tenureMonths;
-      _totalInterest = totalAmount - principal;
+    setState(() {
+      _loanAmountError = null;
+      _interestRateError = null;
+      _tenureError = null;
+    });
 
-      _calculateAmortizationSchedule(principal, rate, tenureMonths);
+    bool isValid = true;
 
-      setState(() {});
-    } else {
-      _emi = 0;
-      _totalInterest = 0;
-      amortizationSchedule = [];
-      setState(() {});
+    if (principal < 50000 || principal > 1000000000) {
+      _loanAmountError = 'Enter an amount between ₹50,000 and ₹100,000,000';
+      isValid = false;
     }
+    if (rate < 7 || rate > 15) {
+      _interestRateError = 'Enter a rate between 7% and 15%';
+      isValid = false;
+    }
+    if (tenureYears < 1 || tenureYears > 35) {
+      _tenureError = 'Enter a tenure between 1 and 35 years';
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    double tenureMonths = tenureYears * 12;
+    double monthlyInterestRate = rate / 12 / 100;
+    _emi = (principal * monthlyInterestRate * pow(1 + monthlyInterestRate, tenureMonths)) /
+        (pow(1 + monthlyInterestRate, tenureMonths) - 1);
+    double totalAmount = _emi * tenureMonths;
+    _totalInterest = totalAmount - principal;
+
+    _buildAmortizationSchedule(principal, monthlyInterestRate, tenureMonths);
+
+    setState(() {});
   }
 
-  void _calculateAmortizationSchedule(double principal, double rate, double tenureMonths) {
-    amortizationSchedule = [];
-    double monthlyInterestRate = rate / 12 / 100;
-    double balance = principal;
+  void _buildAmortizationSchedule(double principal, double monthlyInterestRate, double tenureMonths) {
+    amortizationSchedule.clear();
+    double remainingPrincipal = principal;
 
     for (int month = 1; month <= tenureMonths; month++) {
-      double interestPayment = balance * monthlyInterestRate;
-      double principalPayment = _emi - interestPayment;
-      double closingBalance = balance - principalPayment;
+      double interest = remainingPrincipal * monthlyInterestRate;
+      double principalPaid = _emi - interest;
+      remainingPrincipal -= principalPaid;
 
-      amortizationSchedule.add({
-        'openingBalance': balance,
-        'emi': _emi,
-        'interest': interestPayment,
-        'principal': principalPayment,
-        'closingBalance': closingBalance,
-      });
-
-      balance = closingBalance;
-    }
-  }
-
-  List<Map<String, double>> _getYearlySummary() {
-    List<Map<String, double>> yearlySummary = [];
-    int totalMonths = (_tenureYears * 12).toInt();
-
-    for (int year = 1; year <= _tenureYears; year++) {
-      double yearInterest = 0;
-      double yearPrincipal = 0;
-      double yearOpeningBalance = amortizationSchedule.isNotEmpty ? amortizationSchedule[(year - 1) * 12]['openingBalance']! : _loanAmount;
-
-      for (int month = (year - 1) * 12; month < year * 12 && month < totalMonths; month++) {
-        yearInterest += amortizationSchedule[month]['interest']!;
-        yearPrincipal += amortizationSchedule[month]['principal']!;
+      if (month % 12 == 0 || month == tenureMonths) {
+        amortizationSchedule.add({
+          'year': (month / 12).ceilToDouble(),
+          'openingBalance': principal,
+          'interest': interest,
+          'principal': principalPaid,
+          'closingBalance': remainingPrincipal > 0 ? remainingPrincipal : 0,
+        });
       }
 
-      double yearClosingBalance = amortizationSchedule.length > year * 12
-          ? amortizationSchedule[year * 12]['closingBalance']!
-          : 0;
-
-      yearlySummary.add({
-        'year': year.toDouble(),
-        'openingBalance': yearOpeningBalance,
-        'interest': yearInterest,
-        'principal': yearPrincipal,
-        'closingBalance': yearClosingBalance,
-      });
+      principal -= principalPaid;
     }
-
-    return yearlySummary;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('EMI Calculator')),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildInputSection('Loan Amount', _loanAmountController, _loanAmount, 50000, 1000000, (value) {
-                setState(() {
-                  _loanAmount = value;
-                });
-              }),
-              _buildInputSection('Interest Rate', _interestRateController, _interestRate, 7, 15, (value) {
-                setState(() {
-                  _interestRate = value;
-                });
-              }),
-              _buildInputSection('Loan Tenure (Years)', _tenureController, _tenureYears, 1, 30, (value) {
-                setState(() {
-                  _tenureYears = value;
-                });
-              }),
-
-              ElevatedButton(
-                onPressed: _calculateEMI,
-                child: const Text('Calculate EMI'),
+      appBar: AppBar(
+        title: Text('EMI Calculator', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white.withAlpha(120),
+        elevation: 0,
+      ),
+       body: Stack(
+        children: [
+          AnimatedGradient(),
+          SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(),
+                  SizedBox(height: 24),
+                  _buildInputCard(),
+                  SizedBox(height: 24),
+                  _buildActionButtons(),
+                  SizedBox(height: 24),
+                  _buildResultsCard(),
+                  if (_emi > 0 && _totalInterest >= 0) ...[
+                    SizedBox(height: 24),
+                    _buildYearlySummaryTable(),
+                  ],
+                ],
               ),
-
-              if (_emi > 0 && _totalInterest >= 0) ...[
-                const SizedBox(height: 16),
-                Text('EMI: ₹${_emi.toStringAsFixed(2)}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                _buildInformationCard(),
-                const SizedBox(height: 16),
-
-                SizedBox(
-                  height: 200,
-                  child: PieChart(
-                    PieChartData(
-                      pieTouchData: PieTouchData(
-                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                          setState(() {
-                            if (pieTouchResponse != null && pieTouchResponse.touchedSection != null) {
-                              _touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
-                            } else {
-                              _touchedIndex = -1;
-                            }
-                          });
-                        },
-                      ),
-                      sections: _buildPieChartSections(),
-                      sectionsSpace: 2,
-                      centerSpaceRadius: 40,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                _buildYearlySummaryTable(),
-              ],
-            ],
+            ),
           ),
         ),
+      ],
       ),
     );
   }
 
-  Widget _buildYearlySummaryTable() {
-    final yearlySummary = _getYearlySummary();
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Table(
-          border: TableBorder.all(color: Colors.black),
-          columnWidths: const <int, TableColumnWidth>{
-            0: FixedColumnWidth(80),
-            1: FixedColumnWidth(80),
-            2: FixedColumnWidth(80),
-            3: FixedColumnWidth(80),
-            4: FixedColumnWidth(80),
-          },
+  Widget _buildHeader() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white.withAlpha(120),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TableRow(
-              children: [
-                _buildTableHeader('Year'),
-                _buildTableHeader('Opening Balance'),
-                _buildTableHeader('Interest'),
-                _buildTableHeader('Principal'),
-                _buildTableHeader('Closing Balance'),
-              ],
-            ),
-            for (var row in yearlySummary) TableRow(
-              children: [
-                _buildTableCell(row['year']!.toStringAsFixed(0)),
-                _buildTableCell(row['openingBalance']!.toStringAsFixed(2)),
-                _buildTableCell(row['interest']!.toStringAsFixed(2)),
-                _buildTableCell(row['principal']!.toStringAsFixed(2)),
-                _buildTableCell(row['closingBalance']!.toStringAsFixed(2)),
-              ],
+            Icon(Icons.real_estate_agent, size: 32, color: Color(0xFF8554D1)),
+            SizedBox(width: 12),
+            Expanded(
+              child: AnimatedBuilder(
+                animation: _animation,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _animation.value,
+                    child: Text(
+                      'The best way to predict your future is to create it',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF8554D1),fontStyle: FontStyle.italic ),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -224,112 +197,307 @@ class _EmiCalculatorState extends State<EmiCalculator> {
     );
   }
 
-  Widget _buildTableHeader(String text) {
-    return Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: Center(child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+  Widget _buildInputCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white.withAlpha(120),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildInputField(
+              'Loan Amount (₹)',
+              _loanAmountController,
+              _loanAmount,
+              (value) => setState(() => _loanAmount = value),
+              _loanAmountError,
+              Icons.money,
+            ),
+            SizedBox(height: 16),
+            _buildInputField(
+              'Interest Rate (%)',
+              _interestRateController,
+              _interestRate,
+              (value) => setState(() => _interestRate = value),
+              _interestRateError,
+              Icons.percent,
+            ),
+            SizedBox(height: 16),
+            _buildInputField(
+              'Loan Tenure (Years)',
+              _tenureController,
+              _tenureYears,
+              (value) => setState(() => _tenureYears = value),
+              _tenureError,
+              Icons.calendar_today,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildTableCell(String text) {
-    return Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: Center(child: Text(text, style: const TextStyle(fontSize: 12))),
+  Widget _buildInputField(
+    String label,
+    TextEditingController controller,
+    double value,
+    ValueChanged<double> onChanged,
+    String? errorText,
+    IconData icon,
+  ) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        labelText: label,
+        errorText: errorText,
+        prefixIcon: Icon(icon, color: Color(0xFF8554D1)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Color(0xFF8554D1), width: 2),
+        ),
+      ),
+      onChanged: (text) {
+        final newValue = double.tryParse(text) ?? 0;
+        onChanged(newValue);
+      },
     );
   }
 
-  Widget _buildInputSection(String title, TextEditingController controller, double value, double min, double max, Function(double) onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Text(title, style: const TextStyle(fontSize: 16)),
-        SizedBox(
-          width: 100,
-          child: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            onChanged: (text) {
-              double? newValue = double.tryParse(text);
-              if (newValue != null && newValue >= min && newValue <= max) {
-                onChanged(newValue);
-              } else {
-                controller.text = value.toStringAsFixed(0);
-              }
-            },
-            decoration: const InputDecoration(labelText: 'Amount'),
+        ElevatedButton.icon(
+          onPressed: _calculateEMI,
+          icon: Icon(Icons.calculate),
+          label: Text('Calculate EMI'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white.withAlpha(120),
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
         ),
-        Slider(
-          value: value,
-          min: min,
-          max: max,
-          divisions: (max - min).toInt(),
-          label: value.toInt().toString(),
-          activeColor: Colors.blueAccent, // Change active color
-          inactiveColor: Colors.grey.shade300, // Change inactive color
-          thumbColor: Colors.blue, // Change thumb color
-          onChanged: (double newValue) {
-            setState(() {
-              onChanged(newValue);
-              controller.text = newValue.toStringAsFixed(0);
-            });
-          },
+        ElevatedButton.icon(
+          onPressed: _resetFields,
+          icon: Icon(Icons.refresh),
+          label: Text('Reset'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white.withAlpha(120),
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
         ),
-        const SizedBox(height: 10),
+      ],
+    );
+  }
+
+  Widget _buildResultsCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white.withAlpha(120),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Loan Summary',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF8554D1)),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            _buildPieChartWithLegend(),
+            SizedBox(height: 16),
+            if (_emi > 0 && _totalInterest >= 0) ...[
+              _buildResultItem('Monthly EMI', '₹${currencyFormat.format(_emi)}'),
+              _buildResultItem('Total Interest', '₹${currencyFormat.format(_totalInterest)}'),
+              _buildResultItem('Total Payment', '₹${currencyFormat.format(_emi * _tenureYears * 12)}'),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(value, style: TextStyle(fontSize: 16, color: Color(0xFF8554D1))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPieChartWithLegend() {
+    double principal = _emi * _tenureYears * 12 - _totalInterest;
+    double totalAmount = principal + _totalInterest;
+    double principalPercentage = totalAmount > 0 ? (principal / totalAmount) * 100 : 0;
+    double interestPercentage = totalAmount > 0 ? (_totalInterest / totalAmount) * 100 : 0;
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 200,
+          child: PieChart(
+            PieChartData(
+              sections: _buildPieChartSections(),
+              sectionsSpace: 0,
+              centerSpaceRadius: 40,
+              startDegreeOffset: -90,
+            ),
+          ),
+        ),
+        SizedBox(height: 22),
+        Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  children: [
+    _buildLegendItem('Principal', Color(0xFFCEA9BC), principalPercentage), // Coral color
+    _buildLegendItem('Interest', Color(0xFF0A417A),interestPercentage),   // Teal color
+  ],
+),
+
+      ],
+    );
+  }
+
+  Widget _buildLegendItem(String label, Color color, double percentage) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          color: color,
+        ),
+        SizedBox(width: 8),
+        Text(
+          '$label: ${percentage.toStringAsFixed(1)}%',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
 
   List<PieChartSectionData> _buildPieChartSections() {
+    if (_emi == 0 && _totalInterest == 0) {
+      return [
+        PieChartSectionData(
+          color: Colors.white.withAlpha(120),
+          value: 100,
+          title: '',
+          radius: 80,
+          titleStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54),
+        ),
+      ];
+    }
+
+    double principal = _emi * _tenureYears * 12 - _totalInterest;
     return [
       PieChartSectionData(
-        value: _loanAmount,
-        color: Colors.blueAccent,
-        title: 'Principal\n₹${_loanAmount.toInt()}',
-        radius: _touchedIndex == 0 ? 100 : 80,
-        titleStyle: const TextStyle(fontSize: 14, color: Colors.white),
-        titlePositionPercentageOffset: 0.5,
+        color: Color(0xFFCEA9BC),
+        value: principal,
+        title: '',
+        radius: 80,
       ),
       PieChartSectionData(
+        color: Color(0xFF0A417A),
         value: _totalInterest,
-        color: const Color(0xFFD4A200), // A richer color for interest
-        title: 'Interest\n₹${_totalInterest.toStringAsFixed(0)}',
-        radius: _touchedIndex == 1 ? 100 : 80,
-        titleStyle: const TextStyle(fontSize: 14, color: Colors.white),
-        titlePositionPercentageOffset: 0.5,
+        title: '',
+        radius: 80,
       ),
     ];
   }
 
-  Widget _buildInformationCard() {
+  Widget _buildYearlySummaryTable() {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 10),
       elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+       color: Colors.white.withAlpha(120),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildInfoRow('Loan Amount', '₹${_loanAmount.toStringAsFixed(0)}'),
-            _buildInfoRow('Interest Rate', '${_interestRate.toStringAsFixed(1)}%'),
-            _buildInfoRow('Tenure', '${_tenureYears.toStringAsFixed(0)} years'),
-            _buildInfoRow('Total Interest', '₹${_totalInterest.toStringAsFixed(0)}'),
-            _buildInfoRow('Monthly EMI', '₹${_emi.toStringAsFixed(2)}'),
+            const Text(
+              'Yearly Summary',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF8554D1)),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowColor: MaterialStateProperty.all(Colors.purple.shade100),
+                dataRowColor: MaterialStateProperty.resolveWith<Color?>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+                    }
+                    return null;
+                  },
+                ),
+                columns: [
+                  DataColumn(label: _buildColumnHeader('Year')),
+                  DataColumn(label: _buildColumnHeader('Opening\nBalance')),
+                  DataColumn(label: _buildColumnHeader('Interest')),
+                  DataColumn(label: _buildColumnHeader('Principal')),
+                  DataColumn(label: _buildColumnHeader('Closing\nBalance')),
+                ],
+                rows: amortizationSchedule.map((row) {
+                  return DataRow(cells: [
+                    DataCell(_buildCellText(row['year']!.toStringAsFixed(0))),
+                    DataCell(_buildCellText('₹${currencyFormat.format(row['openingBalance'])}')),
+                    DataCell(_buildCellText('₹${currencyFormat.format(row['interest'])}')),
+                    DataCell(_buildCellText('₹${currencyFormat.format(row['principal'])}')),
+                    DataCell(_buildCellText('₹${currencyFormat.format(row['closingBalance'])}')),
+                  ]);
+                }).toList(),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildColumnHeader(String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          Text(value, style: const TextStyle(fontSize: 16)),
-        ],
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        text,
+        style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF8554D1)),
+        textAlign: TextAlign.center,
       ),
     );
+  }
+
+  Widget _buildCellText(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Text(
+        text,
+        style: TextStyle(color: Colors.black87),
+        textAlign: TextAlign.right,
+      ),
+    );
+  }
+
+  void _resetFields() {
+    _loanAmountController.clear();
+    _interestRateController.clear();
+    _tenureController.clear();
+    setState(() {
+      _emi = 0;
+      _totalInterest = 0;
+      amortizationSchedule.clear();
+    });
   }
 }
