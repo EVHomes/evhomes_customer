@@ -130,7 +130,7 @@ class _HomeWrapperState extends State<HomeWrapper>
           Icon(
             icon,
             color:
-                currentIndex == index ? Colors.deepPurpleAccent : Colors.grey,
+                _currentIndex == index ? Colors.deepPurpleAccent : Colors.grey,
           ),
           Text(
             label,

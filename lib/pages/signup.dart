@@ -70,7 +70,6 @@ class _SignUpTabBarState extends State<SignUpTabBar>
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
-  final bool _isLoading = false;
 
   final Dataprovider _firestoreService = Dataprovider();
 
@@ -165,8 +164,6 @@ class _SignUpTabBarState extends State<SignUpTabBar>
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      String name = _nameController.text;
-                      String email = _emailController.text;
                       String phone = _phoneController.text;
 
                       // Check if phone number exists using FirestoreService
