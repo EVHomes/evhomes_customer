@@ -1,4 +1,6 @@
+import 'package:ev_homes_customer/core/models/user_model.dart';
 import 'package:ev_homes_customer/pages/otp_verification.dart';
+import 'package:ev_homes_customer/provider/dataprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:ev_homes_customer/pages/login_page.dart';
 
@@ -64,6 +66,13 @@ class _SignUpTabBarState extends State<SignUpTabBar>
   final _formKey = GlobalKey<FormState>();
   late AnimationController _animationController;
   late Animation<double> _shinyAnimation;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  final bool _isLoading = false;
+
+  final Dataprovider _firestoreService = Dataprovider();
 
   @override
   void initState() {
@@ -80,6 +89,9 @@ class _SignUpTabBarState extends State<SignUpTabBar>
 
   @override
   void dispose() {
+    _nameController.dispose();
+    widget.emailAddressTextController.dispose();
+    _phoneController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -108,6 +120,7 @@ class _SignUpTabBarState extends State<SignUpTabBar>
               // Name field
               _buildTextField(
                 label: 'Name',
+                controller: _nameController,
                 icon: Icons.person,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -123,7 +136,7 @@ class _SignUpTabBarState extends State<SignUpTabBar>
               _buildTextField(
                 label: 'Email address',
                 icon: Icons.email,
-                controller: widget.emailAddressTextController,
+                controller: _emailController,
                 focusNode: widget.emailAddressFocusNode,
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
@@ -142,23 +155,48 @@ class _SignUpTabBarState extends State<SignUpTabBar>
               const SizedBox(height: 16),
 
               // Phone number field
-              _buildPhoneNumberField(),
+              _buildPhoneNumberField(_phoneController),
 
               const SizedBox(height: 32),
 
               // Register Button with Shiny Animation
               Align(
                 alignment: Alignment.center,
-                child: GestureDetector(
-                  onTap: () {
+                child: ElevatedButton(
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // Navigate to OTP Page on successful validation
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const OtpVerificationPage(),
-                        ),
-                      );
+                      String name = _nameController.text;
+                      String email = _emailController.text;
+                      String phone = _phoneController.text;
+
+                      // Check if phone number exists using FirestoreService
+                      print("pass : $phone");
+                      bool phoneExists =
+                          await _firestoreService.checkPhoneNumberExists(phone);
+
+                      if (phoneExists) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Phone number already exists'),
+                            backgroundColor: Color.fromARGB(255, 59, 59, 59),
+                          ),
+                        );
+                      } else {
+                        // Save user data using FirestoreService
+                        await _firestoreService.signUpUser(UserModel(
+                            name: _nameController.text,
+                            email: _emailController.text,
+                            phone: _phoneController.text));
+                        // Navigate to OTP verification page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OtpVerificationPage(
+                              phoneNumber: phone,
+                            ),
+                          ),
+                        );
+                      }
                     }
                   },
                   child: Stack(
@@ -170,7 +208,8 @@ class _SignUpTabBarState extends State<SignUpTabBar>
                             horizontal: 80,
                             vertical: 16,
                           ),
-                          backgroundColor: const Color(0xFFFF745C), // Button color
+                          backgroundColor:
+                              const Color(0xFFFF745C), // Button color
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -253,10 +292,11 @@ class _SignUpTabBarState extends State<SignUpTabBar>
   }
 
   // Phone number text field with +91 prefix, phone icon, and custom styling
-  Widget _buildPhoneNumberField() {
+  Widget _buildPhoneNumberField(TextEditingController controller) {
     return TextFormField(
       keyboardType: TextInputType.phone,
       maxLength: 10,
+      controller: controller,
       style: const TextStyle(color: Colors.black),
       decoration: InputDecoration(
         labelText: 'Phone Number',

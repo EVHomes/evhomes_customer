@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ev_homes_customer/core/models/meeting_model.dart';
 import 'package:ev_homes_customer/core/models/user_model.dart';
 
 class Dataprovider {
   final CollectionReference usersCollection =
       FirebaseFirestore.instance.collection("users");
+  final CollectionReference meetingCollection =
+      FirebaseFirestore.instance.collection("meeting");
 
 //check whether phone no exists or not
   Future<bool> checkPhoneNumberExists(String phone) async {
@@ -33,6 +36,19 @@ class Dataprovider {
     }
   }
 
+
+//storing meeting details
+  Future<void> storeMeetingData(MeetingModel meeting) async {
+    try {
+      CollectionReference meetings =
+          FirebaseFirestore.instance.collection('meetings');
+      await meetings.add(meeting.toJson());
+      print("Meeting scheduled successfully");
+    } catch (e) {
+      print("Error sending request:$e");
+    }
+  }
+
   //delete otp from db
   Future<void> deleteOtpFromDatabase(String otpId) async {
     // Get a reference to the Firestore database
@@ -48,6 +64,8 @@ class Dataprovider {
     }
   }
 
+  //schedule meeting
+
   // Future<void> getImageURL() async {
   //   final ref = storage.ref.child();
   // }
@@ -60,5 +78,3 @@ class Dataprovider {
 
 //   //List<OtpVerificationPage> get _otpList => _otpList;
 // }
-
-

@@ -1,120 +1,43 @@
 import 'dart:async'; // for StreamSubscription
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ev_homes_customer/core/models/channel_partner.dart';
-import 'package:ev_homes_customer/core/models/employee.dart';
+
+//import 'package:ev_homes_customer/core/models/MeetingModel.dart';
+import 'package:ev_homes_customer/core/models/onBoarding.dart';
 import 'package:ev_homes_customer/core/models/project_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SettingProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  List<String> _designations = [];
-  List<String> _departments = [];
-  List<String> _divisions = [];
+  List<OnBoarding> _onBoarding = [];
   List<ProjectModel> _ourProjects = [];
-  List<Employee> _employees = [];
-  List<ChannelPartner> _channelPartners = [];
-  ChannelPartner? _user;
-  bool isLoading = false;
+  //List<MeetingModel> _meeting = [];
+  List<String> _places = [];
+  List<String> _purposes = [];
+  Map<String, String> _placeUrls = {};
 
-  StreamSubscription? _designationSubscription;
-  StreamSubscription? _departmentSubscription;
-  StreamSubscription? _divisionSubscription;
-  StreamSubscription? _employeeSubscription;
-  StreamSubscription? _channelPartnerSubscription;
-  StreamSubscription? _ourPorjectsSubscription;
-  StreamSubscription? _userSubscription;
-  StreamSubscription? _leadsSubscription;
-
-  SettingProvider() {
-    _fetchDesignations();
-    _fetchDepartments();
-    _fetchDivisions();
-    _fetchEmployees();
-    _fetchChannelPartners();
-    _fetchLoggedUser();
-    _fetchOutProjects();
-    // _fetchLeads();
+  StreamSubscription? _onBoardingSubscription;
+  StreamSubscription? _ourProjectsSubscription;
+//  StreamSubscription? _meetingSubscription;
+  StreamSubscription? _placesSubscription;
+  StreamSubscription? _purposesSubscription;
+  SettingsProvider() {
+    _fetchOnBoarding();
+    _fetchOurProjects();
+    _fetchPlaces();
+    _fetchPurposes();
+   // fetchMeeting();
   }
 
-  List<String> get designations => _designations;
-  List<String> get departments => _departments;
-  List<String> get divisions => _divisions;
+  List<OnBoarding> get onBoarding => _onBoarding;
   List<ProjectModel> get ourProjects => _ourProjects;
-  List<ChannelPartner> get channelPartners => _channelPartners;
-  ChannelPartner? get loggedUser => _user;
-  List<Employee> get employees => _employees;
-
-  void _fetchDesignations() {
-    _designationSubscription =
-        _firestore.collection('designations').snapshots().listen((snapshot) {
-      _designations = snapshot.docs
-          .map((doc) => doc.data()['designation'] as String)
-          .toList();
-      notifyListeners();
-    }, onError: (error) {
-      // Handle error here, like logging
-    });
-  }
-
-  // void _fetchLeads() {
-  //   _leadsSubscription =
-  //       _firestore.collection('leads').snapshots().listen((snapshot) {
-  //     final allL
-  //     _leads = allLeads.where((ele) => ele.cpRefrenceId == _user!.uid).toList();
-
-  //     notifyListeners();
-  //   }, onError: (error) {
-  //     // Handle error here, like logging
-  //   });
-  // }
-
-  void _fetchDepartments() {
-    _departmentSubscription =
-        _firestore.collection('departments').snapshots().listen((snapshot) {
-      _departments = snapshot.docs
-          .map((doc) => doc.data()['department'] as String)
-          .toList();
-      notifyListeners();
-    }, onError: (error) {
-      // Handle error here
-    });
-  }
-
-  void _fetchOutProjects() {
-    _ourPorjectsSubscription =
-        _firestore.collection('ourProjects').snapshots().listen((snapshot) {
-      _ourProjects =
-          snapshot.docs.map((doc) => ProjectModel.fromFirestore(doc)).toList();
-      notifyListeners();
-    }, onError: (error) {
-      // Handle error here
-    });
-  }
-
-  void _fetchDivisions() {
-    _divisionSubscription =
-        _firestore.collection('divisions').snapshots().listen((snapshot) {
-      _divisions =
-          snapshot.docs.map((doc) => doc.data()['division'] as String).toList();
-      notifyListeners();
-    }, onError: (error) {
-      // Handle error here
-    });
-  }
-
-  void _fetchEmployees() {
-    _employeeSubscription =
-        _firestore.collection('employees').snapshots().listen((snapshot) {
-      _employees =
-          snapshot.docs.map((doc) => Employee.fromFirestore(doc)).toList();
-      notifyListeners();
-    }, onError: (error) {
-      // Handle error here
-    });
-  }
+  //List<MeetingModel> get meetings => _meeting;
+  List<String> get places => _places;
+  List<String> get purposes => _purposes;
+  Map<String, String> get placeUrls => _placeUrls;
+=======
+ 
 
   void _fetchChannelPartners() {
     _channelPartnerSubscription =
@@ -128,6 +51,57 @@ class SettingProvider extends ChangeNotifier {
     });
   }
 
+  void _fetchOurProjects() {
+    _ourProjectsSubscription =
+        _firestore.collection('ourProjects').snapshots().listen((snapshot) {
+      _ourProjects =
+          snapshot.docs.map((doc) => ProjectModel.fromFirestore(doc)).toList();
+      notifyListeners();
+    }, onError: (error) {
+      // Handle error here
+    });
+  }
+
+  void _fetchPlaces() {
+    _placesSubscription =
+        _firestore.collection('place').snapshots().listen((snapshot) {
+      _places = snapshot.docs.map((doc) => doc['name'] as String).toList();
+      print(_places);
+      _placeUrls = Map.fromEntries(snapshot.docs
+          .map((doc) => MapEntry(doc['name'] as String, doc['url'] as String)));
+      notifyListeners();
+    }, onError: (error) {
+      // Handle error here
+      print('Error fetching places: $error');
+    });
+  }
+
+  void _fetchPurposes() {
+    _purposesSubscription =
+        _firestore.collection('purpose').snapshots().listen((snapshot) {
+      _purposes = snapshot.docs.map((doc) => doc['name'] as String).toList();
+      notifyListeners();
+    }, onError: (error) {
+      // Handle error here
+      print('Error fetching purposes: $error');
+    });
+  }
+
+  // void fetchMeeting() {
+  //   _meetingSubscription =
+  //       _firestore.collection("scheduleMeeting").snapshots().listen((snapshot) {
+  //     _meeting =
+  //         snapshot.docs.map((doc) => MeetingModel.fromFirestore(doc)).toList();
+  //     notifyListeners();
+  //   }, onError: (error) {
+  //     print('Error fetching purposes: $error');
+  //   });
+  // }
+
+  @override
+  void dispose() {
+    _onBoardingSubscription?.cancel();
+    _ourProjectsSubscription?.cancel();
   void _fetchLoggedUser() {
     isLoading = true; // Start by setting loading to true
     notifyListeners();

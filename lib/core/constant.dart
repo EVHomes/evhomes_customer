@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 class Constant {
@@ -27,3 +28,4 @@ class Constant {
   static Color primarytxtColor = Color(0xFF585858);
   static Color avatorbgColor = Color(0xFFd7f6e3);
 }
+

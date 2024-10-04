@@ -10,16 +10,13 @@ import "./firebase_options.dart";
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => SettingProvider(),
-        ),
-      ],
-      child: const MyApp(),
-    ),
-  );
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => SettingsProvider()),
+      //  ChangeNotifierProvider(create: (context) => DataProvider()),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {

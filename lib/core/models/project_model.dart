@@ -11,7 +11,7 @@ class ProjectModel {
   final List<AmenitiyModel> amenities;
   final String locationName;
   final String locationLink;
-  final String? contactNumber;
+  String? contactNumber;
   String? brochure;
   final String? countryCode;
 
@@ -25,7 +25,7 @@ class ProjectModel {
     required this.locationName,
     required this.locationLink,
     this.contactNumber,
-   this.brochure,
+    this.brochure,
     this.countryCode = "+91",
   });
 
