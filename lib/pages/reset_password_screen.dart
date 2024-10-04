@@ -1,123 +1,60 @@
 import 'package:flutter/material.dart';
 
-class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
-
-  @override
-  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
-}
-
-class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  bool _isObscuredPassword = true;
-  bool _isObscuredConfirmPassword = true;
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+class ResetPasswordPage extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        title: Text('Reset Password'),
+        backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              "Set a new password",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.indigo,
-              ),
+            SizedBox(height: 20),
+            Text(
+              'Enter your email to reset your password',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "Create a new password. Ensure it differs from previous ones for security",
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 30),
-
-            // Password Field
+            SizedBox(height: 20),
             TextField(
-              controller: _passwordController,
-              obscureText: _isObscuredPassword,
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                labelText: "Password",
-                hintText: "Enter your new password",
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isObscuredPassword
-                        ? Icons.visibility_off
-                        : Icons.visibility,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isObscuredPassword = !_isObscuredPassword;
-                    });
-                  },
-                ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
+                labelText: 'Email',
+                hintText: 'Enter your email',
+                prefixIcon: Icon(Icons.email),
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Confirm Password Field
-            TextField(
-              controller: _confirmPasswordController,
-              obscureText: _isObscuredConfirmPassword,
-              decoration: InputDecoration(
-                labelText: "Confirm Password",
-                hintText: "Re-enter password",
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isObscuredConfirmPassword
-                        ? Icons.visibility_off
-                        : Icons.visibility,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isObscuredConfirmPassword = !_isObscuredConfirmPassword;
-                    });
-                  },
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            // Update Password Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle password update action here
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blueAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Update Password",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white, // Text color set to white
-                  ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Handle password reset logic here
+                final email = emailController.text;
+                if (email.isNotEmpty) {
+                  // For example, call Firebase or API to reset the password
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Password reset link sent to $email'),
+                  ));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Please enter a valid email'),
+                  ));
+                }
+              },
+              child: Text('Send Reset Link'),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),

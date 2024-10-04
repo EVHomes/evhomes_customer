@@ -1,6 +1,6 @@
-
 import 'package:ev_homes_customer/core/models/project_model.dart';
-import 'package:ev_homes_customer/pages/description%20.dart';
+// import 'package:ev_homes_customer/pages/description%20.dart';
+import 'package:ev_homes_customer/pages/description_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProjectCard extends StatelessWidget {
@@ -53,7 +53,9 @@ class ProjectCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const DescriptionScreen(),
+              builder: (context) => DescriptionScreen(
+                project: project,
+              ),
             ),
           );
         },
