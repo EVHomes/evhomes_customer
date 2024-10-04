@@ -10,7 +10,7 @@ class CustomAppBar extends StatelessWidget {
   const CustomAppBar({
     required this.onSearchPressed,
     required this.onProfilePressed,
-    super.key,
+    super.key, required bool isSearchVisible, required TextEditingController searchTextEditingControlller,
   });
 
   @override

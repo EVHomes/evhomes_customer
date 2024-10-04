@@ -4,6 +4,7 @@ import 'package:ev_homes_customer/flutterflow/flutter_flow_theme.dart';
 import 'package:ev_homes_customer/flutterflow/flutter_flow_widgets.dart';
 import 'package:ev_homes_customer/pages/account_info_page.dart';
 import 'package:ev_homes_customer/pages/reset_password_screen.dart';
+// import 'package:ev_homes_customer/pages/reset_password_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -70,7 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     return SlideTransition(
                         position: offsetAnimation,
-                        child: const ResetPasswordScreen());
+                        child: ResetPasswordPage());
                   },
                   transitionDuration: const Duration(milliseconds: 600),
                 ),

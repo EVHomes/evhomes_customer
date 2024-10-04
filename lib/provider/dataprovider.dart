@@ -4,7 +4,6 @@ import 'package:ev_homes_customer/core/models/meeting_model.dart';
 import 'package:ev_homes_customer/core/models/user_model.dart';
 
 class Dataprovider {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final CollectionReference usersCollection =
       FirebaseFirestore.instance.collection("users");
   final CollectionReference meetingCollection =

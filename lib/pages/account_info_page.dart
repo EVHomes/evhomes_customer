@@ -1,4 +1,7 @@
+// import 'package:ev_homes_crm_v7/core/providers/setting_provider.dart';
+import 'package:ev_homes_customer/provider/settings_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AccountProfilePage extends StatefulWidget {
   const AccountProfilePage({super.key});
@@ -18,12 +21,15 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
   @override
   void initState() {
     super.initState();
-    // Dummy data for the profile
-    _nameController.text = "John Doe";
-    _emailController.text = "johndoe@example.com";
-    _phoneController.text = "+1 234 567 890";
-    _addressController.text = "123 Main St, Springfield";
-    _reraNoController.text = "RERA123456";
+    // Initial data for the profile
+    final loggedUser =
+        Provider.of<SettingProvider>(context, listen: false).loggedUser;
+
+    _nameController.text = loggedUser?.name ?? "Unkown";
+    _emailController.text = loggedUser?.email ?? "Unkown";
+    _phoneController.text = loggedUser?.phoneNumber ?? "Unkown";
+    _addressController.text = loggedUser?.homeAddress ?? "Unkown";
+    _reraNoController.text = loggedUser?.reraNumber ?? "Rera not Registered";
   }
 
   @override
@@ -38,6 +44,8 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final loggedUser = Provider.of<SettingProvider>(context).loggedUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -60,14 +68,14 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
             const SizedBox(height: 20.0),
 
             // Username
-            const Text(
-              "John Doe",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              loggedUser?.name ?? "Unkown",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 5.0),
-            const Text(
-              "johndoe@example.com",
-              style: TextStyle(color: Colors.deepPurple),
+            Text(
+              loggedUser?.email ?? "mahek@example.com",
+              style: const TextStyle(color: Colors.deepPurple),
             ),
             const SizedBox(height: 20.0),
 
