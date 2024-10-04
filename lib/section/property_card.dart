@@ -14,7 +14,7 @@ class OurProjectList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settingProvider = Provider.of<SettingProvider>(context);
+    final settingProvider = Provider.of<SettingsProvider>(context);
     final List<ProjectModel> outprojects = settingProvider.ourProjects;
 
     return SizedBox(

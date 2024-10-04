@@ -1,4 +1,4 @@
-import 'package:ev_homes_customer/provider/dataprovider.dart';
+// import 'package:ev_homes_customer/provider/dataprovider.dart';
 import 'package:ev_homes_customer/provider/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,7 +19,6 @@ class _ScheduleMeetingState extends State<ScheduleMeeting> {
   String? selectedPurpose;
   final _formKey = GlobalKey<FormState>();
   final _dateController = TextEditingController();
-  final Dataprovider _firestoreMeeting = Dataprovider();
 
   @override
   void initState() {
@@ -109,7 +108,6 @@ class _ScheduleMeetingState extends State<ScheduleMeeting> {
   @override
   Widget build(BuildContext context) {
     final settingsProvider = Provider.of<SettingsProvider>(context);
-    final Dataprovider _firestoreMeeting = Dataprovider();
     final places = settingsProvider.places;
     final purposes = settingsProvider.purposes;
     // final meetings =_firestoreMeeting.storeMeetingData(meeting);

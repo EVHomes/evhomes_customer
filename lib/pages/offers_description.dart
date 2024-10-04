@@ -2,7 +2,7 @@ import 'package:ev_homes_customer/pages/offer.dart';
 import 'package:flutter/material.dart';
 import 'package:ev_homes_customer/pages/AnimatedGradientScreen.dart'; // Import your AnimatedGradientPage
 import 'package:ev_homes_customer/Wrappers/home_wrapper.dart';
-import 'package:ev_homes_customer/pages/login_page.dart'; // Import your login page
+// import 'package:ev_homes_customer/pages/login_page.dart'; // Import your login page
 
 class OfferPage extends StatefulWidget {
   const OfferPage({Key? key}) : super(key: key);
@@ -203,7 +203,7 @@ class _OfferPageState extends State<OfferPage> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
+                backgroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30)),
                 padding:
